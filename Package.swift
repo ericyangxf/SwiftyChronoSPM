@@ -22,9 +22,7 @@ let package = Package(
             dependencies: ["SwiftyChrono"],
             path: "Tests/SwiftyChronoTests",
             exclude: ["Info.plist"],
-            resources: [
-                .copy("JS"),
-            ],
+            resources: [],
             linkerSettings: [
                 .linkedFramework("JavaScriptCore"),
             ]
