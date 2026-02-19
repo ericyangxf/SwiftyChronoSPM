@@ -1362,10 +1362,10 @@ struct EN_DateParsingTests {
     }
     
     @Test
-    func test102_InLastYear() async throws {
+    func test102_LastYear() async throws {
         let chrono = Chrono(preferredLanguage: .english)
         let refDate = createRefDate(year: 2026, month: 1, day: 20)
-        let result = chrono.parse(text: "Show my spending record in last year", refDate: refDate)
+        let result = chrono.parse(text: "Show my spending record last year", refDate: refDate)
         let startDate = try #require(result.first?.start.date)
         let startComponents = dateComponents(date: startDate)
         #expect(startComponents.year == 2025)
@@ -1379,7 +1379,24 @@ struct EN_DateParsingTests {
     }
     
     @Test
-    func test103_SinceLastMonth() async throws {
+    func test103_InTheLastYear() async throws {
+        let chrono = Chrono(preferredLanguage: .english)
+        let refDate = createRefDate(year: 2026, month: 1, day: 20)
+        let result = chrono.parse(text: "Show my spending record in the last year", refDate: refDate)
+        let startDate = try #require(result.first?.start.date)
+        let startComponents = dateComponents(date: startDate)
+        #expect(startComponents.year == 2025)
+        #expect(startComponents.month == 1)
+        #expect(startComponents.day == 20)
+        let endDate = try #require(result.first?.end?.date)
+        let endComponents = dateComponents(date: endDate)
+        #expect(endComponents.year == 2026)
+        #expect(endComponents.month == 1)
+        #expect(endComponents.day == 20)
+    }
+    
+    @Test
+    func test104_SinceLastMonth() async throws {
         let chrono = Chrono(preferredLanguage: .english)
         let refDate = createRefDate(year: 2026, month: 1, day: 20)
         let result = chrono.parse(text: "Show my spending record since last month", refDate: refDate)
@@ -1391,10 +1408,10 @@ struct EN_DateParsingTests {
     }
     
     @Test
-    func test104_InLastMonth() async throws {
+    func test105_LastMonth() async throws {
         let chrono = Chrono(preferredLanguage: .english)
         let refDate = createRefDate(year: 2026, month: 1, day: 20)
-        let result = chrono.parse(text: "Show my spending record in last month", refDate: refDate)
+        let result = chrono.parse(text: "Show my spending record last month", refDate: refDate)
         let startDate = try #require(result.first?.start.date)
         let startComponents = dateComponents(date: startDate)
         #expect(startComponents.year == 2025)
@@ -1408,7 +1425,24 @@ struct EN_DateParsingTests {
     }
     
     @Test
-    func test105_SinceLastWeek() async throws {
+    func test106_InTheLastMonth() async throws {
+        let chrono = Chrono(preferredLanguage: .english)
+        let refDate = createRefDate(year: 2026, month: 1, day: 20)
+        let result = chrono.parse(text: "Show my spending record in the last month", refDate: refDate)
+        let startDate = try #require(result.first?.start.date)
+        let startComponents = dateComponents(date: startDate)
+        #expect(startComponents.year == 2025)
+        #expect(startComponents.month == 12)
+        #expect(startComponents.day == 20)
+        let endDate = try #require(result.first?.end?.date)
+        let endComponents = dateComponents(date: endDate)
+        #expect(endComponents.year == 2026)
+        #expect(endComponents.month == 1)
+        #expect(endComponents.day == 20)
+    }
+    
+    @Test
+    func test107_SinceLastWeek() async throws {
         let chrono = Chrono(preferredLanguage: .english)
         let refDate = createRefDate(year: 2026, month: 1, day: 20)
         let result = chrono.parse(text: "Show my spending record since last week", refDate: refDate)
@@ -1420,10 +1454,10 @@ struct EN_DateParsingTests {
     }
     
     @Test
-    func test106_InLastWeek() async throws {
+    func test108_LastWeek() async throws {
         let chrono = Chrono(preferredLanguage: .english)
         let refDate = createRefDate(year: 2026, month: 1, day: 20)
-        let result = chrono.parse(text: "Show my spending record in last week", refDate: refDate)
+        let result = chrono.parse(text: "Show my spending record last week", refDate: refDate)
         let startDate = try #require(result.first?.start.date)
         let startComponents = dateComponents(date: startDate)
         #expect(startComponents.year == 2026)
@@ -1434,5 +1468,22 @@ struct EN_DateParsingTests {
         #expect(endComponents.year == 2026)
         #expect(endComponents.month == 1)
         #expect(endComponents.day == 18)
+    }
+    
+    @Test
+    func test109_InTheLastWeek() async throws {
+        let chrono = Chrono(preferredLanguage: .english)
+        let refDate = createRefDate(year: 2026, month: 1, day: 20)
+        let result = chrono.parse(text: "Show my spending record in the last week", refDate: refDate)
+        let startDate = try #require(result.first?.start.date)
+        let startComponents = dateComponents(date: startDate)
+        #expect(startComponents.year == 2026)
+        #expect(startComponents.month == 1)
+        #expect(startComponents.day == 14)
+        let endDate = try #require(result.first?.end?.date)
+        let endComponents = dateComponents(date: endDate)
+        #expect(endComponents.year == 2026)
+        #expect(endComponents.month == 1)
+        #expect(endComponents.day == 20)
     }
 }

@@ -52,7 +52,7 @@ public class ENRelativeDateFormatParser: Parser {
         let hasExplicitMultiplier = !numberText.isEmpty
         let prefixText = text.substring(from: 0, to: index).lowercased()
         let hasSincePrefix = NSRegularExpression.isMatch(forPattern: "\\bsince\\s*$", in: prefixText)
-        let hasInPrefix = NSRegularExpression.isMatch(forPattern: "\\bin\\s*$", in: prefixText)
+        let hasInPrefix = NSRegularExpression.isMatch(forPattern: "\\bin\\s*(the\\s*)?$", in: prefixText)
 
         var date = ref
         if match.isNotEmpty(atRangeIndex: relativeWordGroup) {
@@ -65,8 +65,20 @@ public class ENRelativeDateFormatParser: Parser {
                 result.start.assign(.day, value: date.day)
             } else if NSRegularExpression.isMatch(forPattern: "week", in: relativeWord) {
                 let isSingleWeekRange = !hasExplicitMultiplier && !isHalf
-                let shouldUseCalendarWeekRange = isSingleWeekRange && (isLastModifier || isNextModifier || hasSincePrefix || hasInPrefix)
-                if shouldUseCalendarWeekRange {
+                let shouldUseCalendarWeekRange = isSingleWeekRange && (isLastModifier || isNextModifier || hasSincePrefix)
+                let shouldUseRollingRange = isSingleWeekRange && hasInPrefix && isLastModifier
+                if shouldUseRollingRange {
+                    // "in the last week" = 7-day window ending at ref (inclusive)
+                    let rangeStart = ref.added(-6, .day)
+                    result.start.assign(.year, value: rangeStart.year)
+                    result.start.assign(.month, value: rangeStart.month)
+                    result.start.assign(.day, value: rangeStart.day)
+
+                    result.end = ParsedComponents(components: nil, ref: result.start.date)
+                    result.end?.assign(.year, value: ref.year)
+                    result.end?.assign(.month, value: ref.month)
+                    result.end?.assign(.day, value: ref.day)
+                } else if shouldUseCalendarWeekRange {
                     let offsetToMonday = (ref.weekday + 6) % 7
                     let currentWeekMonday = ref.added(-offsetToMonday, .day)
                     let rangeStart = currentWeekMonday.added(number * 7, .day)
@@ -93,16 +105,34 @@ public class ENRelativeDateFormatParser: Parser {
             } else if NSRegularExpression.isMatch(forPattern: "month", in: relativeWord) {
                 date = isHalf ? date.added(modifier * (date.numberOf(.day, inA: .month) ?? 30)/2 , .day) : date.added(number * 1, .month)
                 let isSingleMonthRange = !hasExplicitMultiplier && !isHalf
-                if isSingleMonthRange {
-                    result.start.assign(.day, value: 1)
-                    result.start.assign(.month, value: date.month)
-                    result.start.assign(.year, value: date.year)
+                let shouldUseRollingMonthRange = isSingleMonthRange && hasInPrefix && isLastModifier
+                if shouldUseRollingMonthRange {
+                    // "in the last month" = rolling window from (ref - 1 month) to ref
+                    let rangeStart = ref.added(-1, .month)
+                    result.start.assign(.year, value: rangeStart.year)
+                    result.start.assign(.month, value: rangeStart.month)
+                    result.start.assign(.day, value: rangeStart.day)
+
                     result.end = ParsedComponents(components: nil, ref: result.start.date)
-                    result.end?.assign(.year, value: date.year)
-                    result.end?.assign(.month, value: date.month)
-                    let daysInMonth = date.numberOf(.day, inA: .month) ?? 0
-                    if daysInMonth > 0 {
-                        result.end?.assign(.day, value: daysInMonth)
+                    result.end?.assign(.year, value: ref.year)
+                    result.end?.assign(.month, value: ref.month)
+                    result.end?.assign(.day, value: ref.day)
+                } else if isSingleMonthRange {
+                    if hasSincePrefix {
+                        result.start.assign(.day, value: 1)
+                        result.start.assign(.month, value: date.month)
+                        result.start.assign(.year, value: date.year)
+                    } else {
+                        result.start.assign(.day, value: 1)
+                        result.start.assign(.month, value: date.month)
+                        result.start.assign(.year, value: date.year)
+                        result.end = ParsedComponents(components: nil, ref: result.start.date)
+                        result.end?.assign(.year, value: date.year)
+                        result.end?.assign(.month, value: date.month)
+                        let daysInMonth = date.numberOf(.day, inA: .month) ?? 0
+                        if daysInMonth > 0 {
+                            result.end?.assign(.day, value: daysInMonth)
+                        }
                     }
                 } else {
                     // We don't know the exact day for next/last month
@@ -113,15 +143,32 @@ public class ENRelativeDateFormatParser: Parser {
             } else if NSRegularExpression.isMatch(forPattern: "year", in: relativeWord) {
                 date = isHalf ? date.added(modifier * 6 , .month) : date.added(number, .year)
                 let isSingleYearRange = !hasExplicitMultiplier && !isHalf
-                // We don't know the exact day for month on next/last year
-                if isSingleYearRange {
-                    result.start.imply(.day, to: 1)
-                    result.start.imply(.month, to: 1)
-                    result.start.assign(.year, value: date.year)
+                let shouldUseRollingYearRange = isSingleYearRange && hasInPrefix && isLastModifier
+                if shouldUseRollingYearRange {
+                    // "in the last year" = rolling window from (ref - 1 year) to ref
+                    let rangeStart = ref.added(-1, .year)
+                    result.start.assign(.year, value: rangeStart.year)
+                    result.start.assign(.month, value: rangeStart.month)
+                    result.start.assign(.day, value: rangeStart.day)
+
                     result.end = ParsedComponents(components: nil, ref: result.start.date)
-                    result.end?.assign(.year, value: date.year)
-                    result.end?.assign(.month, value: 12)
-                    result.end?.assign(.day, value: 31)
+                    result.end?.assign(.year, value: ref.year)
+                    result.end?.assign(.month, value: ref.month)
+                    result.end?.assign(.day, value: ref.day)
+                } else if isSingleYearRange {
+                    if hasSincePrefix {
+                        result.start.imply(.day, to: 1)
+                        result.start.imply(.month, to: 1)
+                        result.start.assign(.year, value: date.year)
+                    } else {
+                        result.start.imply(.day, to: 1)
+                        result.start.imply(.month, to: 1)
+                        result.start.assign(.year, value: date.year)
+                        result.end = ParsedComponents(components: nil, ref: result.start.date)
+                        result.end?.assign(.year, value: date.year)
+                        result.end?.assign(.month, value: 12)
+                        result.end?.assign(.day, value: 31)
+                    }
                 } else {
                     result.start.imply(.day, to: date.day)
                     result.start.imply(.month, to: date.month)

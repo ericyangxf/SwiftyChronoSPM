@@ -13,6 +13,7 @@
 *.perspectivev3
 !default.perspectivev3
 xcuserdata
+*.xcworkspacedata
 
 ## Other
 *.xccheckout

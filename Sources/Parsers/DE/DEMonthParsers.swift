@@ -8,7 +8,7 @@
 import Foundation
 
 private let THIS_MONTH_PATTERN = "(^|\\s)(?:in\\s+)?(?:diesen|diesem|dieser)\\s+monat(?=\\b|\\s|$)"
-private let LAST_MONTH_PATTERN = "(^|\\s)(?:im\\s+|in\\s+)?(?:letzten|letztem)\\s+monat(?=\\b|\\s|$)"
+private let LAST_MONTH_PATTERN = "(^|\\s)(?:(?:im|in)\\s+)?(?:letzten|letztem)\\s+monat(?=\\b|\\s|$)"
 
 public class DEThisMonthParser: Parser {
     override var pattern: String { return THIS_MONTH_PATTERN }
@@ -38,6 +38,13 @@ public class DELastMonthParser: Parser {
 
     override public func extract(text: String, ref: Date, match: NSTextCheckingResult, opt: [OptionType: Int]) -> ParsedResult? {
         let (matchText, index) = matchTextAndIndex(from: text, andMatchResult: match)
+
+        // Defer to DERelativeDateFormatParser when "im"/"in" prefix is part of match for rolling window
+        let matchLower = matchText.lowercased()
+        if NSRegularExpression.isMatch(forPattern: "^(im|in)\\s+", in: matchLower) {
+            return nil
+        }
+
         let lastMonth = ref.added(-1, .month)
         var result = ParsedResult(ref: ref, index: index, text: matchText)
 

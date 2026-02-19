@@ -8,7 +8,7 @@
 import Foundation
 
 private let THIS_MONTH_PATTERN = "(^|\\s)(?:en\\s+)?este\\s+mes(?=\\b|\\s|$)"
-private let LAST_MONTH_PATTERN = "(^|\\s)(?:en\\s+)?(?:el\\s+)?mes\\s+pasado(?=\\b|\\s|$)"
+private let LAST_MONTH_PATTERN = "(^|\\s)(?:(?:en\\s+)?(?:el\\s+))?mes\\s+pasado(?=\\b|\\s|$)"
 
 public class ESThisMonthParser: Parser {
     override var pattern: String { return THIS_MONTH_PATTERN }
@@ -38,6 +38,13 @@ public class ESLastMonthParser: Parser {
 
     override public func extract(text: String, ref: Date, match: NSTextCheckingResult, opt: [OptionType: Int]) -> ParsedResult? {
         let (matchText, index) = matchTextAndIndex(from: text, andMatchResult: match)
+
+        // Defer to ESRelativeDateFormatParser when "en" prefix is part of match for rolling window
+        let matchLower = matchText.lowercased()
+        if NSRegularExpression.isMatch(forPattern: "^en\\s+", in: matchLower) {
+            return nil
+        }
+
         let lastMonth = ref.added(-1, .month)
         var result = ParsedResult(ref: ref, index: index, text: matchText)
 
