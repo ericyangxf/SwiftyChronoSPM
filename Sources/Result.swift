@@ -312,6 +312,10 @@ public enum TagUnit { case
     frMergeDateAndTimeRefiner,
     
     deMergeDateAndTimeRefiner,
-    deMergeDateRangeRefiner
+    deMergeDateRangeRefiner,
+
+    /// The result ends at the reference date only because "since"/"from" left the range open;
+    /// an explicit end found later replaces it.
+    openEndedRange
 }
 

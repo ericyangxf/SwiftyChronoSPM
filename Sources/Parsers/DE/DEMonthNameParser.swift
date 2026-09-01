@@ -44,6 +44,8 @@ public class DEMonthNameParser: Parser {
             result.start.assign(.month, value: month)
             result.start.assign(.year, value: year)
             result.yearText = yearText
+        } else if DEStartsOpenEndedRange(in: text, matchIndex: index, matchEndIndex: index + matchText.count) {
+            applySinceRange(to: &result, month: month, day: day, isDayCertain: false, ref: ref)
         } else {
             var refMoment = ref
             refMoment = refMoment.setOrAdded(month, .month)
@@ -66,4 +68,5 @@ public class DEMonthNameParser: Parser {
         result.tags[.deMonthNameParser] = true
         return result
     }
+
 }

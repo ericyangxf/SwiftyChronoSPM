@@ -79,3 +79,16 @@ let FR_INTEGER_WORDS = [
     "douze" : 12,
     "treize" : 13,
 ]
+
+/// True when "depuis" or "à partir de" immediately precedes the match, opening a range that
+/// looks backward from the reference date: "depuis mars", "à partir du 20 mars".
+/// An explicit range ("de mars à juin") is excluded and left to the range refiner.
+func FRStartsOpenEndedRange(in text: String, matchIndex: Int, matchEndIndex: Int) -> Bool {
+    let prefixText = text.substring(from: 0, to: matchIndex).lowercased()
+    guard NSRegularExpression.isMatch(forPattern: "(?:^|\\s)(?:depuis|à\\s+partir\\s+d[eu])\\s*(?:l[ea’']\\s*)?$", in: prefixText) else {
+        return false
+    }
+
+    let suffixText = text.substring(from: matchEndIndex).lowercased()
+    return !NSRegularExpression.isMatch(forPattern: "^\\s*(?:(?:à|au|a|jusqu|et)\\b|[-–—])", in: suffixText)
+}

@@ -45,3 +45,15 @@ extension String {
         return str
     }
 }
+
+/// True when 以降 or から immediately follows the match, opening a range that looks backward
+/// from the reference date: "3月以降", "3月20日から".
+/// The "AからBまで" range form is excluded and left to the range refiner.
+func JPStartsOpenEndedRange(in text: String, matchEndIndex: Int) -> Bool {
+    let suffixText = text.substring(from: matchEndIndex)
+    guard NSRegularExpression.isMatch(forPattern: "^\\s*(?:以降|から)", in: suffixText) else {
+        return false
+    }
+
+    return !NSRegularExpression.isMatch(forPattern: "^\\s*から\\s*(?:[0-9０-９]|[^\\s、。]{0,8}まで)", in: suffixText)
+}

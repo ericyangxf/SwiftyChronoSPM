@@ -1486,4 +1486,107 @@ struct ES_DateParsingTests {
         #expect(endComponents.month == 1)
         #expect(endComponents.day == 20)
     }
+
+    @Test
+    func test110_SinceMarch() async throws {
+        let chrono = Chrono(preferredLanguage: .spanish)
+        let refDate = createRefDate(year: 2026, month: 9, day: 1)
+        let result = chrono.parse(text: "Muestra mi registro de gastos desde marzo", refDate: refDate)
+        let startDate = try #require(result.first?.start.date)
+        let startComponents = dateComponents(date: startDate)
+        #expect(startComponents.year == 2026)
+        #expect(startComponents.month == 3)
+        #expect(startComponents.day == 1)
+        let endDate = try #require(result.first?.end?.date)
+        let endComponents = dateComponents(date: endDate)
+        #expect(endComponents.year == 2026)
+        #expect(endComponents.month == 9)
+        #expect(endComponents.day == 1)
+    }
+
+
+    @Test
+    func test111_SinceMarch20() async throws {
+        let chrono = Chrono(preferredLanguage: .spanish)
+        let refDate = createRefDate(year: 2026, month: 9, day: 1)
+        let result = chrono.parse(text: "Muestra mi registro de gastos desde el 20 de marzo", refDate: refDate)
+        let startDate = try #require(result.first?.start.date)
+        let startComponents = dateComponents(date: startDate)
+        #expect(startComponents.year == 2026)
+        #expect(startComponents.month == 3)
+        #expect(startComponents.day == 20)
+        let endDate = try #require(result.first?.end?.date)
+        let endComponents = dateComponents(date: endDate)
+        #expect(endComponents.year == 2026)
+        #expect(endComponents.month == 9)
+        #expect(endComponents.day == 1)
+    }
+
+    @Test
+    func test112_SinceMarch20ToYesterday() async throws {
+        let chrono = Chrono(preferredLanguage: .spanish)
+        let refDate = createRefDate(year: 2026, month: 9, day: 1)
+        let result = chrono.parse(text: "Muestra mi registro de gastos desde el 20 de marzo hasta ayer", refDate: refDate)
+        let startDate = try #require(result.first?.start.date)
+        let startComponents = dateComponents(date: startDate)
+        #expect(startComponents.year == 2026)
+        #expect(startComponents.month == 3)
+        #expect(startComponents.day == 20)
+        let endDate = try #require(result.first?.end?.date)
+        let endComponents = dateComponents(date: endDate)
+        #expect(endComponents.year == 2026)
+        #expect(endComponents.month == 8)
+        #expect(endComponents.day == 31)
+    }
+
+    @Test
+    func test113_FromMarch() async throws {
+        let chrono = Chrono(preferredLanguage: .spanish)
+        let refDate = createRefDate(year: 2026, month: 9, day: 1)
+        let result = chrono.parse(text: "Muestra mi registro de gastos a partir de marzo", refDate: refDate)
+        let startDate = try #require(result.first?.start.date)
+        let startComponents = dateComponents(date: startDate)
+        #expect(startComponents.year == 2026)
+        #expect(startComponents.month == 3)
+        #expect(startComponents.day == 1)
+        let endDate = try #require(result.first?.end?.date)
+        let endComponents = dateComponents(date: endDate)
+        #expect(endComponents.year == 2026)
+        #expect(endComponents.month == 9)
+        #expect(endComponents.day == 1)
+    }
+
+    @Test
+    func test114_FromMarch20() async throws {
+        let chrono = Chrono(preferredLanguage: .spanish)
+        let refDate = createRefDate(year: 2026, month: 9, day: 1)
+        let result = chrono.parse(text: "Muestra mi registro de gastos a partir del 20 de marzo", refDate: refDate)
+        let startDate = try #require(result.first?.start.date)
+        let startComponents = dateComponents(date: startDate)
+        #expect(startComponents.year == 2026)
+        #expect(startComponents.month == 3)
+        #expect(startComponents.day == 20)
+        let endDate = try #require(result.first?.end?.date)
+        let endComponents = dateComponents(date: endDate)
+        #expect(endComponents.year == 2026)
+        #expect(endComponents.month == 9)
+        #expect(endComponents.day == 1)
+    }
+
+    @Test
+    func test115_FromMarch20ToYesterday() async throws {
+        let chrono = Chrono(preferredLanguage: .spanish)
+        let refDate = createRefDate(year: 2026, month: 9, day: 1)
+        let result = chrono.parse(text: "Muestra mi registro de gastos a partir del 20 de marzo hasta ayer", refDate: refDate)
+        let startDate = try #require(result.first?.start.date)
+        let startComponents = dateComponents(date: startDate)
+        #expect(startComponents.year == 2026)
+        #expect(startComponents.month == 3)
+        #expect(startComponents.day == 20)
+        let endDate = try #require(result.first?.end?.date)
+        let endComponents = dateComponents(date: endDate)
+        #expect(endComponents.year == 2026)
+        #expect(endComponents.month == 8)
+        #expect(endComponents.day == 31)
+    }
 }

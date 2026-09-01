@@ -26,7 +26,8 @@ class MergeDateRangeRefiner: Refiner {
             currentResult = results[i]
             previousResult = results[i-1]
             
-            if previousResult.end == nil && currentResult!.end == nil &&
+            let previousEndIsProvisional = previousResult.tags[.openEndedRange] ?? false
+            if (previousResult.end == nil || previousEndIsProvisional) && currentResult!.end == nil &&
                 isAbleToMerge(text: text, result1: previousResult, result2: currentResult!) {
                 
                 results[i] = mergeResult(refText: text, fromResult: previousResult, toResult: currentResult!)
@@ -83,6 +84,7 @@ class MergeDateRangeRefiner: Refiner {
         }
         
         fromResult.end = toResult.start
+        fromResult.tags.removeValue(forKey: .openEndedRange)
         if let end = fromResult.end,
             end.isCertain(component: .month),
             !end.isCertain(component: .day)

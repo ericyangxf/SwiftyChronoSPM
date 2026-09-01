@@ -9,7 +9,7 @@
 import Foundation
 
 class FRMergeDateRangeRefiner: MergeDateRangeRefiner {
-    override var PATTERN: String { return "^\\s*(à|au|a|\\-)\\s*$" }
+    override var PATTERN: String { return "^\\s*(?:à|au|a|jusqu[’']a[u]?|jusqu[’']à)\\s*(?:l[ea’']\\s*)?$|^\\s*\\-\\s*$" }
     override var TAGS: TagUnit { return .frMergeDateRangeRefiner }
 
     override func isAbleToMerge(text: String, result1: ParsedResult, result2: ParsedResult) -> Bool {

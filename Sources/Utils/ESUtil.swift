@@ -78,3 +78,16 @@ let ES_MONTH_OFFSET = [
     "dic": 12,
     "dic.": 12,
 ]
+
+/// True when "desde" or "a partir de" immediately precedes the match, opening a range that
+/// looks backward from the reference date: "desde marzo", "a partir del 20 de marzo".
+/// An explicit range ("de marzo a junio") is excluded and left to the range refiner.
+func ESStartsOpenEndedRange(in text: String, matchIndex: Int, matchEndIndex: Int) -> Bool {
+    let prefixText = text.substring(from: 0, to: matchIndex).lowercased()
+    guard NSRegularExpression.isMatch(forPattern: "(?:^|\\s)(?:desde|a\\s+partir\\s+de)l?\\s*(?:el\\s+)?$", in: prefixText) else {
+        return false
+    }
+
+    let suffixText = text.substring(from: matchEndIndex).lowercased()
+    return !NSRegularExpression.isMatch(forPattern: "^\\s*(?:(?:a|al|hasta|y|e)\\b|[-–—])", in: suffixText)
+}

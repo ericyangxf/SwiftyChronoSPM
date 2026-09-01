@@ -44,6 +44,8 @@ public class ESMonthNameParser: Parser {
             result.start.assign(.month, value: month)
             result.start.assign(.year, value: year)
             result.yearText = yearText
+        } else if ESStartsOpenEndedRange(in: text, matchIndex: index, matchEndIndex: index + matchText.count) {
+            applySinceRange(to: &result, month: month, day: day, isDayCertain: false, ref: ref)
         } else {
             var refMoment = ref
             refMoment = refMoment.setOrAdded(month, .month)
@@ -65,4 +67,5 @@ public class ESMonthNameParser: Parser {
         result.tags[.esMonthNameParser] = true
         return result
     }
+
 }

@@ -136,3 +136,16 @@ let DE_ORDINAL_WORDS = DE_ORDINAL_WORDS_BASIC.reduce([String: Int]()) { (result,
 }
 
 let DE_ORDINAL_WORDS_PATTERN = "(?:\(DE_ORDINAL_WORDS_BASIC.keys.map{ $0 + "[nrms]?" }.joined(separator: "|").replacingOccurrences(of: " ", with: "[ -]")))";
+
+/// True when "seit" or "ab" immediately precedes the match, opening a range that looks
+/// backward from the reference date: "seit März", "ab 20. März".
+/// An explicit range ("von März bis Juni") is excluded and left to the range refiner.
+func DEStartsOpenEndedRange(in text: String, matchIndex: Int, matchEndIndex: Int) -> Bool {
+    let prefixText = text.substring(from: 0, to: matchIndex).lowercased()
+    guard NSRegularExpression.isMatch(forPattern: "\\b(?:seit|ab)\\s*(?:dem\\s+)?$", in: prefixText) else {
+        return false
+    }
+
+    let suffixText = text.substring(from: matchEndIndex).lowercased()
+    return !NSRegularExpression.isMatch(forPattern: "^\\s*(?:bis\\b|[-–—])", in: suffixText)
+}

@@ -33,6 +33,8 @@ public class ZHMonthNameParser: Parser {
 
         var result = ParsedResult(ref: ref, index: index, text: matchText)
 
+        let opensRange = ZHStartsOpenEndedRange(in: text, matchIndex: index, matchEndIndex: index + matchText.count)
+
         if match.isNotEmpty(atRangeIndex: yearGroup) {
             let yearText = match.string(from: text, atRangeIndex: yearGroup)
             var year = Int(yearText) ?? 0
@@ -43,6 +45,13 @@ public class ZHMonthNameParser: Parser {
             result.start.assign(.month, value: month)
             result.start.imply(.day, to: 1)
             result.yearText = yearText
+
+            if opensRange {
+                // "自2025年7月以来" -> start = July 1, end = refDate
+                applyOpenRangeEnd(to: &result, ref: ref)
+            }
+        } else if opensRange {
+            applySinceRange(to: &result, month: month, day: 1, isDayCertain: false, ref: ref)
         } else {
             // Pick the closest year for this month
             var refMoment = ref
@@ -65,4 +74,5 @@ public class ZHMonthNameParser: Parser {
         result.tags[.zhMonthNameParser] = true
         return result
     }
+
 }

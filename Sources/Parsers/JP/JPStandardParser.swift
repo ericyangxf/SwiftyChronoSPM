@@ -61,8 +61,15 @@ public class JPStandardParser: Parser {
         result.start.assign(.day, value: startMoment.day)
         result.start.assign(.month, value: startMoment.month)
 
+        let opensRange = JPStartsOpenEndedRange(in: text, matchEndIndex: index + matchText.count)
+
         if let year = explicitYear {
             result.start.assign(.year, value: year)
+            if opensRange {
+                applyOpenRangeEnd(to: &result, ref: ref)
+            }
+        } else if opensRange {
+            applySinceRange(to: &result, month: month, day: day, isDayCertain: true, ref: ref)
         } else {
             //Find the most appropriated year
             startMoment = startMoment.setOrAdded(ref.year, .year)

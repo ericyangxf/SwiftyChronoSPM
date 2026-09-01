@@ -119,3 +119,18 @@ let EN_ORDINAL_WORDS = [
     "thirty first": 31
 ]
 let EN_ORDINAL_WORDS_PATTERN = "(?:\(EN_ORDINAL_WORDS.keys.joined(separator: "|").replacingOccurrences(of: " ", with: "[ -]")))"
+
+/// True when "since" or "from" immediately precedes the match, opening a range that looks
+/// backward from the reference date: "since March", "from March 20".
+///
+/// An explicit range ("from March to June") is excluded: its end comes from the other date,
+/// and its year has to stay open so the range refiner can propagate one across the pair.
+func ENStartsOpenEndedRange(in text: String, matchIndex: Int, matchEndIndex: Int) -> Bool {
+    let prefixText = text.substring(from: 0, to: matchIndex).lowercased()
+    guard NSRegularExpression.isMatch(forPattern: "\\b(?:since|from)\\s*$", in: prefixText) else {
+        return false
+    }
+
+    let suffixText = text.substring(from: matchEndIndex).lowercased()
+    return !NSRegularExpression.isMatch(forPattern: "^\\s*(?:(?:to|and)\\b|[-–—])", in: suffixText)
+}

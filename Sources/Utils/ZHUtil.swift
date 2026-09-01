@@ -67,3 +67,21 @@ func ZHStringToYear(text: String) -> Int {
 }
 
 
+
+/// True when the match is introduced by 自/从/從 or followed by 以来/以后, opening a range that
+/// looks backward from the reference date: "自3月以来", "从3月20日开始".
+/// An explicit range ("3月到6月") is excluded and left to the range refiner.
+func ZHStartsOpenEndedRange(in text: String, matchIndex: Int, matchEndIndex: Int) -> Bool {
+    let suffixText = text.substring(from: matchEndIndex)
+    guard !NSRegularExpression.isMatch(forPattern: "^\\s*[到至\\-－]", in: suffixText) else {
+        return false
+    }
+
+    // 来自 is a word of its own ("coming from"), not the 自 marker.
+    let prefixText = text.substring(from: 0, to: matchIndex)
+    if NSRegularExpression.isMatch(forPattern: "(?<![来來])[自从從]\\s*$", in: prefixText) {
+        return true
+    }
+
+    return NSRegularExpression.isMatch(forPattern: "^\\s*(?:以来|以來|以后|以後)", in: suffixText)
+}

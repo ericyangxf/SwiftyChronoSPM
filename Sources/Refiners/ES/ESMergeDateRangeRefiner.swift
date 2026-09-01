@@ -8,7 +8,7 @@
 import Foundation
 
 class ESMergeDateRangeRefiner: MergeDateRangeRefiner {
-    override var PATTERN: String { return "^\\s*(a|al|\\-)\\s*$" }
+    override var PATTERN: String { return "^\\s*(?:a|al|hasta)\\s*(?:el\\s*)?$|^\\s*\\-\\s*$" }
     override var TAGS: TagUnit { return .esMergeDateRangeRefiner }
 
     override func isAbleToMerge(text: String, result1: ParsedResult, result2: ParsedResult) -> Bool {

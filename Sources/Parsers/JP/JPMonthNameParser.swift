@@ -33,9 +33,7 @@ public class JPMonthNameParser: Parser {
 
         var result = ParsedResult(ref: ref, index: index, text: matchText)
 
-        // Check for 以降 suffix -> means "since this month" (not から, which connects to another date)
-        let suffixText = text.substring(from: index + matchText.count, to: min(index + matchText.count + 5, text.count))
-        let hasSinceSuffix = NSRegularExpression.isMatch(forPattern: "^\\s*以降", in: suffixText)
+        let opensRange = JPStartsOpenEndedRange(in: text, matchEndIndex: index + matchText.count)
 
         if match.isNotEmpty(atRangeIndex: yearGroup) {
             let yearText = match.string(from: text, atRangeIndex: yearGroup)
@@ -48,13 +46,12 @@ public class JPMonthNameParser: Parser {
             result.start.imply(.day, to: 1)
             result.yearText = yearText
 
-            if hasSinceSuffix {
+            if opensRange {
                 // "2025年7月以降" -> start = July 1, end = refDate
-                result.end = ParsedComponents(components: nil, ref: ref)
-                result.end?.assign(.year, value: ref.year)
-                result.end?.assign(.month, value: ref.month)
-                result.end?.assign(.day, value: ref.day)
+                applyOpenRangeEnd(to: &result, ref: ref)
             }
+        } else if opensRange {
+            applySinceRange(to: &result, month: month, day: 1, isDayCertain: false, ref: ref)
         } else {
             // Pick the closest year for this month
             var refMoment = ref
@@ -72,13 +69,6 @@ public class JPMonthNameParser: Parser {
             result.start.assign(.month, value: month)
             result.start.imply(.day, to: 1)
             result.start.imply(.year, to: refMoment.year)
-
-            if hasSinceSuffix {
-                result.end = ParsedComponents(components: nil, ref: ref)
-                result.end?.assign(.year, value: ref.year)
-                result.end?.assign(.month, value: ref.month)
-                result.end?.assign(.day, value: ref.day)
-            }
         }
 
         result.tags[.jpMonthNameParser] = true

@@ -11,6 +11,36 @@ import Foundation
 let HALF = Int.min
 let HALF_SECOND_IN_MS = millisecondsToNanoSeconds(500) // unit: nanosecond
 
+/// Applies "since <date>" / "from <date>" semantics to a result whose year is not stated in
+/// the text: the range starts at the most recent occurrence of `month`/`day` at or before
+/// `ref` and runs up to the reference date.
+///
+/// The end is provisional - it is tagged `.openEndedRange` so that a range refiner may still
+/// replace it with an explicit end, as in "from March 20 to yesterday".
+func applySinceRange(to result: inout ParsedResult, month: Int, day: Int, isDayCertain: Bool, ref: Date) {
+    let year = (month, day) > (ref.month, ref.day) ? ref.year - 1 : ref.year
+
+    result.start.assign(.month, value: month)
+    result.start.assign(.year, value: year)
+    if isDayCertain {
+        result.start.assign(.day, value: day)
+    } else {
+        result.start.imply(.day, to: day)
+    }
+
+    applyOpenRangeEnd(to: &result, ref: ref)
+}
+
+/// Ends a "since"/"from" range at the reference date. The end is provisional: it is tagged
+/// `.openEndedRange` so that a range refiner may still replace it with an explicit end.
+func applyOpenRangeEnd(to result: inout ParsedResult, ref: Date) {
+    result.end = ParsedComponents(components: nil, ref: ref)
+    result.end?.assign(.year, value: ref.year)
+    result.end?.assign(.month, value: ref.month)
+    result.end?.assign(.day, value: ref.day)
+    result.tags[.openEndedRange] = true
+}
+
 /// get ascending order from two number.
 /// ATTENSION:
 func sortTwoNumbers(_ index1: Int, _ index2: Int) -> (lessNumber: Int, greaterNumber: Int) {

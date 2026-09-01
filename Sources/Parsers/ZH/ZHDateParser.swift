@@ -61,6 +61,8 @@ public class ZHDateParser: Parser {
             result.start.imply(.day, to: startMoment.day)
         }
         
+        let opensRange = ZHStartsOpenEndedRange(in: text, matchIndex: index, matchEndIndex: index + matchText.count)
+
         //Year
         if match.isNotEmpty(atRangeIndex: yearGroup) {
             let yearString = match.string(from: text, atRangeIndex: yearGroup)
@@ -69,6 +71,11 @@ public class ZHDateParser: Parser {
             }
             
             result.start.assign(.year, value: year)
+            if opensRange {
+                applyOpenRangeEnd(to: &result, ref: ref)
+            }
+        } else if opensRange, let day = result.start[.day] {
+            applySinceRange(to: &result, month: month, day: day, isDayCertain: true, ref: ref)
         } else {
             result.start.imply(.year, to: startMoment.year)
         }

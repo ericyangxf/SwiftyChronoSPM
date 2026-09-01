@@ -79,6 +79,8 @@ public class ENMonthNameLittleEndianParser: Parser {
 //            } else {
 //                result.start.assign(.year, value: year)
 //            }
+        } else if match.isEmpty(atRangeIndex: dateToGroup) && ENStartsOpenEndedRange(in: text, matchIndex: index, matchEndIndex: index + matchText.count) {
+            applySinceRange(to: &result, month: month, day: day, isDayCertain: true, ref: ref)
         } else {
             //Find the most appropriated year
             var refMoment = ref
